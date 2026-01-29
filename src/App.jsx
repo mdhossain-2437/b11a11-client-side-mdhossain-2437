@@ -26,7 +26,8 @@ function App() {
           <Link to="/" className="text-primary font-display text-2xl">CarRent</Link>
           <div className="space-x-4">
             <Link to="/" className="hover:text-primary">Home</Link>
-            {!user && <Link to="/login" className="hover:text-primary">Login</Link>}
+          <Link to="/available-cars" className="hover:text-primary">Available Cars</Link>
+          {!user && <Link to="/login" className="hover:text-primary">Login</Link>}
             {!user && <Link to="/register" className="hover:text-primary">Register</Link>}
             {user && <Link to="/dashboard" className="hover:text-primary">My Cars</Link>}
             {user && <button onClick={handleLogout} className="hover:text-primary">Logout</button>}
@@ -34,6 +35,7 @@ function App() {
         </nav>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/available-cars" element={<AvailableCars />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={
