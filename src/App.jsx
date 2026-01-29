@@ -23,6 +23,7 @@ function App() {
     } catch {}
   }
   return (
+    <>
       <Toaster position="top-right" reverseOrder={false} />
       <div className="min-h-screen bg-background text-white font-body">
         <nav className="flex items-center justify-between px-6 py-4 backdrop-blur bg-surface/60">
@@ -61,6 +62,7 @@ function App() {
           } />
         </Routes>
       </div>
+    </>
   )
 }
 
