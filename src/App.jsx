@@ -4,11 +4,13 @@ import { Toaster } from 'react-hot-toast'
 import { Link, Route, Routes, useNavigate } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
 import { AuthContext } from './context/AuthProvider'
-import Home from './pages/Home/Home'
-import AvailableCars from './pages/AvailableCars/AvailableCars'
 import AddCar from './pages/AddCar/AddCar'
-import MyCars from './pages/MyCars/MyCars'
+import AvailableCars from './pages/AvailableCars/AvailableCars'
+import CarDetails from './pages/CarDetails/CarDetails'
+import Home from './pages/Home/Home'
 import Login from './pages/Login/Login'
+import MyBookings from './pages/MyBookings/MyBookings'
+import MyCars from './pages/MyCars/MyCars'
 import Register from './pages/Register/Register'
 
 function App() {
@@ -34,12 +36,14 @@ function App() {
             {!user && <Link to="/login" className="hover:text-primary">Login</Link>}
             {!user && <Link to="/register" className="hover:text-primary">Register</Link>}
             {user && <Link to="/my-cars" className="hover:text-primary">My Cars</Link>}
+            {user && <Link to="/my-bookings" className="hover:text-primary">My Bookings</Link>}
             {user && <button onClick={handleLogout} className="hover:text-primary">Logout</button>}
           </div>
         </nav>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/available-cars" element={<AvailableCars />} />
+          <Route path="/car/:id" element={<CarDetails />} />
           <Route path="/add-car" element={
             <ProtectedRoute>
               <AddCar />
@@ -50,6 +54,11 @@ function App() {
           <Route path="/my-cars" element={
             <ProtectedRoute>
               <MyCars />
+            </ProtectedRoute>
+          } />
+          <Route path="/my-bookings" element={
+            <ProtectedRoute>
+              <MyBookings />
             </ProtectedRoute>
           } />
         </Routes>
