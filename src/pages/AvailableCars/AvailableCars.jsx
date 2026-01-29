@@ -13,6 +13,7 @@ const AvailableCars = () => {
     const [search, setSearch] = useState('');
     const [sort, setSort] = useState('');
     const containerRef = useRef(null);
+    const controlsRef = useRef(null);
 
     // Debounce search
     const [debouncedSearch, setDebouncedSearch] = useState(search);
@@ -22,6 +23,19 @@ const AvailableCars = () => {
         }, 500);
         return () => clearTimeout(handler);
     }, [search]);
+
+    // Initial Controls Animation
+    useEffect(() => {
+        if (controlsRef.current) {
+            gsap.from(controlsRef.current.children, {
+                y: 20,
+                opacity: 0,
+                stagger: 0.1,
+                duration: 0.6,
+                ease: "power2.out"
+            });
+        }
+    }, []);
 
     const { data: cars = [], isLoading, isError } = useQuery({
         queryKey: ['cars', debouncedSearch, sort],
@@ -60,7 +74,7 @@ const AvailableCars = () => {
                 </div>
 
                 {/* Controls */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 bg-surface p-4 rounded-xl border border-white/5">
+                <div ref={controlsRef} className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 bg-surface p-4 rounded-xl border border-white/5">
 
                     {/* Search */}
                     <div className="relative w-full md:w-96">

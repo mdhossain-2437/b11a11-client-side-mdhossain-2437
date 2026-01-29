@@ -60,6 +60,7 @@ function App() {
               <MyBookings />
             </ProtectedRoute>
           } />
+          <Route path="*" element={<Error404 />} />
         </Routes>
       </div>
     </>
