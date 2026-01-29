@@ -1,9 +1,10 @@
 import { ReactLenis } from '@studio-freight/react-lenis'
+import { useContext } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { Link, Route, Routes, useNavigate } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
-import { useContext } from 'react'
 import { AuthContext } from './context/AuthProvider'
+import Home from './pages/Home/Home'
 import Login from './pages/Login/Login'
 import Register from './pages/Register/Register'
 
@@ -32,12 +33,7 @@ function App() {
           </div>
         </nav>
         <Routes>
-          <Route path="/" element={
-            <div className="text-center pt-20">
-              <h1 className="text-4xl text-primary font-display">Car Rental System Initialized 🚀</h1>
-              <p className="text-secondary mt-4">Ready for Awwwards-level development.</p>
-            </div>
-          } />
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={

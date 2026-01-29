@@ -15,8 +15,8 @@ export default {
         accent: '#FF4D4D', // Red for errors/actions
       },
       fontFamily: {
-        display: ['"Clash Display"', 'sans-serif'],
-        body: ['"Satoshi"', 'sans-serif'],
+        display: ['"Syne"', 'sans-serif'],
+        body: ['"Inter"', 'sans-serif'],
       },
     },
   },
