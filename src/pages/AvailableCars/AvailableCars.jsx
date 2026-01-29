@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { gsap } from 'gsap';
 import { Flip } from 'gsap/Flip';
 import { Link } from 'react-router-dom';
 import { FaTh, FaList, FaSearch, FaGasPump, FaCogs } from 'react-icons/fa';
-import useAxiosSecure from '../../hooks/useAxiosSecure';
+import axiosSecure from '../../services/axios';
 
 gsap.registerPlugin(Flip);
 
@@ -14,7 +13,6 @@ const AvailableCars = () => {
     const [search, setSearch] = useState('');
     const [sort, setSort] = useState('');
     const containerRef = useRef(null);
-    const axiosSecure = useAxiosSecure();
 
     // Debounce search
     const [debouncedSearch, setDebouncedSearch] = useState(search);
