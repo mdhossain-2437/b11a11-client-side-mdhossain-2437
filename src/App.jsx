@@ -1,4 +1,3 @@
-import { ReactLenis } from '@studio-freight/react-lenis'
 import { useContext } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { Link, Route, Routes, useNavigate } from 'react-router-dom'
@@ -24,7 +23,6 @@ function App() {
     } catch {}
   }
   return (
-    <ReactLenis root>
       <Toaster position="top-right" reverseOrder={false} />
       <div className="min-h-screen bg-background text-white font-body">
         <nav className="flex items-center justify-between px-6 py-4 backdrop-blur bg-surface/60">
@@ -63,7 +61,6 @@ function App() {
           } />
         </Routes>
       </div>
-    </ReactLenis>
   )
 }
 

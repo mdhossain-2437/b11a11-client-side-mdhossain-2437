@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { gsap } from 'gsap';
-import { Flip } from 'gsap/Flip';
+import Flip from 'gsap/dist/Flip';
+import { useEffect, useRef, useState } from 'react';
+import { FaCogs, FaGasPump, FaList, FaSearch, FaTh } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { FaTh, FaList, FaSearch, FaGasPump, FaCogs } from 'react-icons/fa';
 import axiosSecure from '../../services/axios';
 
 gsap.registerPlugin(Flip);
@@ -34,10 +34,10 @@ const AvailableCars = () => {
     // Handle Layout Toggle with GSAP Flip
     const toggleView = (newView) => {
         if (view === newView) return;
-        
+
         const state = Flip.getState(".car-card");
         setView(newView);
-        
+
         // Wait for React to update DOM
         setTimeout(() => {
             Flip.from(state, {
@@ -61,13 +61,13 @@ const AvailableCars = () => {
 
                 {/* Controls */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 bg-surface p-4 rounded-xl border border-white/5">
-                    
+
                     {/* Search */}
                     <div className="relative w-full md:w-96">
                         <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary" />
-                        <input 
-                            type="text" 
-                            placeholder="Search by model, brand, or location..." 
+                        <input
+                            type="text"
+                            placeholder="Search by model, brand, or location..."
                             className="w-full bg-background border border-white/10 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-primary text-white placeholder-gray-500 transition-colors"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -76,7 +76,7 @@ const AvailableCars = () => {
 
                     <div className="flex items-center gap-4 w-full md:w-auto">
                         {/* Sort */}
-                        <select 
+                        <select
                             className="bg-background border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-primary text-white cursor-pointer"
                             value={sort}
                             onChange={(e) => setSort(e.target.value)}
@@ -90,13 +90,13 @@ const AvailableCars = () => {
 
                         {/* View Toggle */}
                         <div className="flex bg-background rounded-lg p-1 border border-white/10">
-                            <button 
+                            <button
                                 onClick={() => toggleView('grid')}
                                 className={`p-2 rounded-md transition-all ${view === 'grid' ? 'bg-primary text-black shadow-lg' : 'text-secondary hover:text-white'}`}
                             >
                                 <FaTh />
                             </button>
-                            <button 
+                            <button
                                 onClick={() => toggleView('list')}
                                 className={`p-2 rounded-md transition-all ${view === 'list' ? 'bg-primary text-black shadow-lg' : 'text-secondary hover:text-white'}`}
                             >
@@ -118,14 +118,14 @@ const AvailableCars = () => {
                 ) : (
                     <div ref={containerRef} className={view === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
                         {cars.map((car) => (
-                            <div 
-                                key={car._id} 
+                            <div
+                                key={car._id}
                                 className={`car-card bg-surface rounded-xl overflow-hidden border border-white/5 hover:border-primary/30 transition-shadow duration-300 hover:shadow-[0_0_20px_rgba(0,0,0,0.4)] ${view === 'list' ? 'flex flex-col md:flex-row' : ''}`}
                             >
                                 <div className={`relative overflow-hidden ${view === 'list' ? 'w-full md:w-1/3 h-48 md:h-auto' : 'h-56'}`}>
-                                    <img 
-                                        src={car.image || "https://via.placeholder.com/400x300?text=Car+Image"} 
-                                        alt={car.model} 
+                                    <img
+                                        src={car.image || "https://via.placeholder.com/400x300?text=Car+Image"}
+                                        alt={car.model}
                                         className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
                                     />
                                     <div className={`absolute top-3 left-3 px-2 py-1 rounded text-xs font-bold ${car.available ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
@@ -140,16 +140,16 @@ const AvailableCars = () => {
                                             {view === 'list' && <p className="text-primary text-xl font-bold">${car.dailyPrice}<span className="text-sm text-secondary font-normal">/day</span></p>}
                                         </div>
                                         {view === 'grid' && <p className="text-primary text-lg font-bold mb-3">${car.dailyPrice}<span className="text-sm text-secondary font-normal">/day</span></p>}
-                                        
+
                                         <p className="text-secondary text-sm mb-4 line-clamp-2">{car.description || "Experience the ultimate driving machine."}</p>
-                                        
+
                                         <div className="flex gap-4 text-xs text-secondary mb-4">
                                             <span className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded"><FaGasPump /> {car.fuelType || "Petrol"}</span>
                                             <span className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded"><FaCogs /> {car.transmission || "Auto"}</span>
                                         </div>
                                     </div>
 
-                                    <Link 
+                                    <Link
                                         to={`/car/${car._id}`}
                                         className="block w-full text-center bg-white/10 hover:bg-primary hover:text-black py-2 rounded-lg transition-all duration-300 font-semibold"
                                     >
