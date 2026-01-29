@@ -1,9 +1,22 @@
 import { ReactLenis } from '@studio-freight/react-lenis'
 import { Toaster } from 'react-hot-toast'
-import { Link, Route, Routes } from 'react-router-dom'
+import { Link, Route, Routes, useNavigate } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
+import { useContext } from 'react'
+import { AuthContext } from './context/AuthProvider'
+import Login from './pages/Login/Login'
+import Register from './pages/Register/Register'
 
 function App() {
+  const { user, logout } = useContext(AuthContext)
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      navigate('/', { replace: true })
+    } catch {}
+  }
   return (
     <ReactLenis root>
       <Toaster position="top-right" reverseOrder={false} />
@@ -12,8 +25,10 @@ function App() {
           <Link to="/" className="text-primary font-display text-2xl">CarRent</Link>
           <div className="space-x-4">
             <Link to="/" className="hover:text-primary">Home</Link>
-            <Link to="/login" className="hover:text-primary">Login</Link>
-            <Link to="/dashboard" className="hover:text-primary">My Cars</Link>
+            {!user && <Link to="/login" className="hover:text-primary">Login</Link>}
+            {!user && <Link to="/register" className="hover:text-primary">Register</Link>}
+            {user && <Link to="/dashboard" className="hover:text-primary">My Cars</Link>}
+            {user && <button onClick={handleLogout} className="hover:text-primary">Logout</button>}
           </div>
         </nav>
         <Routes>
@@ -23,7 +38,8 @@ function App() {
               <p className="text-secondary mt-4">Ready for Awwwards-level development.</p>
             </div>
           } />
-          <Route path="/login" element={<div className="p-8 text-center">Login page placeholder</div>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <div className="p-8 text-center">Protected Dashboard</div>
