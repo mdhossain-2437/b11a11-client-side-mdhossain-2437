@@ -7,6 +7,7 @@ import { AuthContext } from './context/AuthProvider'
 import Home from './pages/Home/Home'
 import AvailableCars from './pages/AvailableCars/AvailableCars'
 import AddCar from './pages/AddCar/AddCar'
+import MyCars from './pages/MyCars/MyCars'
 import Login from './pages/Login/Login'
 import Register from './pages/Register/Register'
 
@@ -32,7 +33,7 @@ function App() {
             {user && <Link to="/add-car" className="hover:text-primary">Add Car</Link>}
             {!user && <Link to="/login" className="hover:text-primary">Login</Link>}
             {!user && <Link to="/register" className="hover:text-primary">Register</Link>}
-            {user && <Link to="/dashboard" className="hover:text-primary">My Cars</Link>}
+            {user && <Link to="/my-cars" className="hover:text-primary">My Cars</Link>}
             {user && <button onClick={handleLogout} className="hover:text-primary">Logout</button>}
           </div>
         </nav>
@@ -46,9 +47,9 @@ function App() {
           } />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={
+          <Route path="/my-cars" element={
             <ProtectedRoute>
-              <div className="p-8 text-center">Protected Dashboard</div>
+              <MyCars />
             </ProtectedRoute>
           } />
         </Routes>
