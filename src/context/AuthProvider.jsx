@@ -1,4 +1,4 @@
-import { createContext, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import {
   createUserWithEmailAndPassword,
@@ -11,8 +11,9 @@ import {
 } from 'firebase/auth'
 import { auth, googleProvider } from '../services/firebase'
 import axiosSecure from '../services/axios'
+import { AuthContext } from './auth-context'
 
-export const AuthContext = createContext(null)
+export { AuthContext }
 
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null)

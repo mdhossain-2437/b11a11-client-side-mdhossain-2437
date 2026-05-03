@@ -18,7 +18,11 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  useEffect(() => setOpen(false), [location.pathname])
+  useEffect(() => {
+    // close mobile menu on route change
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOpen(false)
+  }, [location.pathname])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16)
