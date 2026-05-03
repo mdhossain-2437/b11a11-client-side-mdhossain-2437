@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
@@ -8,10 +8,19 @@ import axiosSecure from '../../services/axios'
 import Loader from '../../components/Loader/Loader'
 import { formatDate } from '../../utils/date'
 
+const sortOptions = [
+  { v: '', t: 'Default' },
+  { v: 'date_desc', t: 'Newest first' },
+  { v: 'date_asc', t: 'Oldest first' },
+  { v: 'price_asc', t: 'Price: low → high' },
+  { v: 'price_desc', t: 'Price: high → low' },
+]
+
 export default function MyCars() {
   const queryClient = useQueryClient()
   const [editing, setEditing] = useState(null)
   const [deleting, setDeleting] = useState(null)
+  const [sort, setSort] = useState('')
 
   const { data: cars = [], isLoading } = useQuery({
     queryKey: ['my-cars'],
@@ -20,6 +29,24 @@ export default function MyCars() {
       return res.data
     },
   })
+
+  const sortedCars = useMemo(() => {
+    if (!sort) return cars
+    const list = [...cars]
+    const time = (v) => new Date(v ?? 0).getTime()
+    switch (sort) {
+      case 'date_desc':
+        return list.sort((a, b) => time(b.postedDate) - time(a.postedDate))
+      case 'date_asc':
+        return list.sort((a, b) => time(a.postedDate) - time(b.postedDate))
+      case 'price_asc':
+        return list.sort((a, b) => (a.dailyPrice ?? 0) - (b.dailyPrice ?? 0))
+      case 'price_desc':
+        return list.sort((a, b) => (b.dailyPrice ?? 0) - (a.dailyPrice ?? 0))
+      default:
+        return list
+    }
+  }, [cars, sort])
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
@@ -42,9 +69,23 @@ export default function MyCars() {
             <h1 className="font-display font-bold text-4xl md:text-5xl">My Cars</h1>
             <p className="text-secondary mt-2">Manage everything you have listed for rent in one place.</p>
           </div>
-          <Link to="/add-car" className="btn-primary self-start">
-            <FaPlus /> Add a new car
-          </Link>
+          <div className="flex items-center gap-3 self-start">
+            {cars.length > 1 && (
+              <select
+                className="input cursor-pointer"
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                aria-label="Sort my cars"
+              >
+                {sortOptions.map((o) => (
+                  <option key={o.v} value={o.v}>Sort: {o.t}</option>
+                ))}
+              </select>
+            )}
+            <Link to="/add-car" className="btn-primary">
+              <FaPlus /> Add a new car
+            </Link>
+          </div>
         </header>
 
         {isLoading ? (
@@ -73,7 +114,7 @@ export default function MyCars() {
                 </tr>
               </thead>
               <tbody>
-                {cars.map((c, idx) => (
+                {sortedCars.map((c, idx) => (
                   <tr
                     key={c._id}
                     className={`border-t border-white/5 transition-colors hover:bg-primary/5 ${
