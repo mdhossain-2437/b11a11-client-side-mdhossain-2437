@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { FaCarSide, FaDollarSign, FaMousePointer, FaHeadset, FaShieldAlt, FaBolt } from 'react-icons/fa'
+import SectionHeading from '../../../components/SectionHeading/SectionHeading'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -35,7 +36,7 @@ export default function WhyChooseUs() {
       <div className="section">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-primary uppercase tracking-[0.3em] text-xs mb-3">Why Choose Us</p>
-          <h2 className="font-display font-bold text-4xl md:text-5xl">A premium experience, end-to-end</h2>
+          <SectionHeading className="font-display font-bold text-4xl md:text-5xl overflow-hidden">A premium experience, end-to-end</SectionHeading>
           <p className="text-secondary mt-3">
             We obsess over the details so you can focus on the road. Here&apos;s what makes VelocityDrive different.
           </p>

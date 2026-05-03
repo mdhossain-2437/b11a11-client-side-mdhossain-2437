@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Link } from 'react-router-dom'
 import axiosSecure from '../../../services/axios'
 import CarCard from '../../../components/CarCard/CarCard'
+import SectionHeading from '../../../components/SectionHeading/SectionHeading'
 import { FaArrowRight } from 'react-icons/fa'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -129,7 +130,7 @@ export default function RecentListings() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
           <div>
             <p className="text-primary uppercase tracking-[0.3em] text-xs mb-3">Latest Drops</p>
-            <h2 className="font-display font-bold text-4xl md:text-5xl">Recent Listings</h2>
+            <SectionHeading className="font-display font-bold text-4xl md:text-5xl overflow-hidden">Recent Listings</SectionHeading>
             <p className="text-secondary mt-2 max-w-xl">
               Freshly added to our garage. Hand-picked, inspected and ready to roll.
             </p>

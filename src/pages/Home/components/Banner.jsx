@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { FaArrowRight, FaPlay, FaStar } from 'react-icons/fa'
+import Magnetic from '../../../components/Magnetic/Magnetic'
 
 export default function Banner() {
   const rootRef = useRef(null)
@@ -52,9 +53,11 @@ export default function Banner() {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <Link to="/available-cars" className="bn-cta btn-primary !px-7 !py-3.5 text-base">
-              View Available Cars <FaArrowRight />
-            </Link>
+            <Magnetic strength={0.25}>
+              <Link to="/available-cars" className="bn-cta btn-primary !px-7 !py-3.5 text-base">
+                View Available Cars <FaArrowRight />
+              </Link>
+            </Magnetic>
             <a
               href="#why-us"
               className="bn-cta inline-flex items-center gap-3 text-secondary hover:text-white transition-colors group"

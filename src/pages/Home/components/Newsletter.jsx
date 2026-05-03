@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { FaPaperPlane } from 'react-icons/fa'
+import Magnetic from '../../../components/Magnetic/Magnetic'
 
 export default function Newsletter() {
   const [email, setEmail] = useState('')
@@ -47,9 +48,17 @@ export default function Newsletter() {
                 onChange={(e) => setEmail(e.target.value)}
                 aria-label="Email address"
               />
-              <button type="submit" disabled={busy} className="btn-primary !py-3">
-                <FaPaperPlane /> {busy ? 'Subscribing…' : 'Subscribe'}
-              </button>
+              <Magnetic strength={0.18}>
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="btn-primary !py-3 group relative overflow-hidden"
+                >
+                  <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" aria-hidden />
+                  <FaPaperPlane className={`relative transition-transform duration-300 ${busy ? 'translate-x-1 -translate-y-0.5' : 'group-hover:translate-x-1 group-hover:-translate-y-0.5'}`} />
+                  <span className="relative">{busy ? 'Subscribing…' : 'Subscribe'}</span>
+                </button>
+              </Magnetic>
             </form>
           </div>
         </div>

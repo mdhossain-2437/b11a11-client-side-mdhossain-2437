@@ -3,6 +3,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Link } from 'react-router-dom'
 import { FaArrowRight } from 'react-icons/fa'
+import SectionHeading from '../../../components/SectionHeading/SectionHeading'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -65,7 +66,7 @@ export default function SpecialOffers() {
       <div className="section pt-20">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <p className="text-primary uppercase tracking-[0.3em] text-xs mb-3">Special Offers</p>
-          <h2 className="font-display font-bold text-4xl md:text-5xl">Deals worth turning your engine on</h2>
+          <SectionHeading className="font-display font-bold text-4xl md:text-5xl overflow-hidden">Deals worth turning your engine on</SectionHeading>
           <p className="text-secondary mt-3">Exclusive promotions, curated weekly. Snap them before they&apos;re gone.</p>
         </div>
 
