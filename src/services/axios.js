@@ -1,19 +1,15 @@
 import axios from 'axios'
- 
+
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
 const axiosSecure = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL,
   withCredentials: true,
 })
- 
+
 axiosSecure.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error?.response?.status === 401) {
-      // Optionally force logout UI when unauthorized
-    }
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
- 
+
 export default axiosSecure
- 

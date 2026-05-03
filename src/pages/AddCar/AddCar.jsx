@@ -1,103 +1,153 @@
-import { useContext } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthProvider';
-import axiosSecure from '../../services/axios';
+import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
+import { FaCarSide, FaPlus } from 'react-icons/fa'
+import axiosSecure from '../../services/axios'
 
-const AddCar = () => {
-  const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
-  const { register, handleSubmit, reset } = useForm();
+export default function AddCar() {
+  const navigate = useNavigate()
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      available: 'true',
+      fuelType: 'Petrol',
+      transmission: 'Auto',
+    },
+  })
 
   const onSubmit = async (data) => {
     try {
       const payload = {
         model: data.model,
         brand: data.brand,
-        dailyPrice: data.dailyPrice,
+        dailyPrice: Number(data.dailyPrice),
         available: data.available === 'true',
         regNumber: data.regNumber,
-        features: data.features ? data.features.split(',').map(f => f.trim()) : [],
+        features: data.features ? data.features.split(',').map((f) => f.trim()).filter(Boolean) : [],
         description: data.description,
         image: data.image,
         location: data.location,
         fuelType: data.fuelType,
         transmission: data.transmission,
-      };
-      const res = await axiosSecure.post('/cars', payload);
+      }
+      const res = await axiosSecure.post('/cars', payload)
       if (res?.data?.insertedId) {
-        toast.success('Car added successfully');
-        reset();
-        navigate('/available-cars');
+        toast.success('Car listed successfully')
+        reset()
+        navigate('/my-cars')
+      } else {
+        toast.error('Could not list the car')
       }
     } catch (e) {
-      toast.error('Failed to add car');
+      toast.error(e?.response?.data?.message || 'Failed to add car')
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-background text-white pt-24 pb-10 px-4 md:px-8">
-      <div className="max-w-3xl mx-auto bg-surface border border-white/5 rounded-2xl p-8">
-        <h1 className="text-3xl md:text-4xl font-display font-bold mb-6">Add a Car</h1>
-        <p className="text-secondary mb-8">Fill out the details below to list your car.</p>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm text-secondary mb-2">Model</label>
-            <input className="w-full bg-background border border-white/10 rounded-lg px-3 py-2" {...register('model', { required: true })} />
-          </div>
-          <div>
-            <label className="block text-sm text-secondary mb-2">Brand</label>
-            <input className="w-full bg-background border border-white/10 rounded-lg px-3 py-2" {...register('brand', { required: true })} />
-          </div>
-          <div>
-            <label className="block text-sm text-secondary mb-2">Daily Price ($)</label>
-            <input type="number" className="w-full bg-background border border-white/10 rounded-lg px-3 py-2" {...register('dailyPrice', { required: true, min: 1 })} />
-          </div>
-          <div>
-            <label className="block text-sm text-secondary mb-2">Availability</label>
-            <select className="w-full bg-background border border-white/10 rounded-lg px-3 py-2" {...register('available', { required: true })}>
+    <section className="py-14 md:py-20">
+      <div className="section max-w-4xl mx-auto">
+        <header className="mb-8 text-center">
+          <p className="text-primary uppercase tracking-[0.3em] text-xs mb-3">List your car</p>
+          <h1 className="font-display font-bold text-4xl md:text-5xl flex items-center justify-center gap-3">
+            <FaCarSide className="text-primary" /> Add a Car
+          </h1>
+          <p className="text-secondary mt-3">Fill out the details below — your car will be live in seconds.</p>
+        </header>
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="glass rounded-3xl p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-5"
+          noValidate
+        >
+          <Field label="Model" error={errors.model}>
+            <input className="input" {...register('model', { required: 'Model is required' })} placeholder="Toyota Camry 2023" />
+          </Field>
+          <Field label="Brand" error={errors.brand}>
+            <input className="input" {...register('brand', { required: 'Brand is required' })} placeholder="Toyota" />
+          </Field>
+          <Field label="Daily Rental Price ($)" error={errors.dailyPrice}>
+            <input
+              type="number"
+              className="input"
+              min="1"
+              step="1"
+              {...register('dailyPrice', { required: 'Price is required', min: { value: 1, message: 'Must be at least 1' } })}
+              placeholder="45"
+            />
+          </Field>
+          <Field label="Availability">
+            <select className="input cursor-pointer" {...register('available')}>
               <option value="true">Available</option>
               <option value="false">Booked</option>
             </select>
-          </div>
-          <div>
-            <label className="block text-sm text-secondary mb-2">Registration Number</label>
-            <input className="w-full bg-background border border-white/10 rounded-lg px-3 py-2" {...register('regNumber', { required: true })} />
-          </div>
-          <div>
-            <label className="block text-sm text-secondary mb-2">Features (comma-separated)</label>
-            <input className="w-full bg-background border border-white/10 rounded-lg px-3 py-2" {...register('features')} placeholder="GPS, AC, Bluetooth" />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm text-secondary mb-2">Description</label>
-            <textarea className="w-full bg-background border border-white/10 rounded-lg px-3 py-2" rows="3" {...register('description', { required: true })}></textarea>
-          </div>
-          <div>
-            <label className="block text-sm text-secondary mb-2">Image URL</label>
-            <input className="w-full bg-background border border-white/10 rounded-lg px-3 py-2" {...register('image', { required: true })} />
-          </div>
-          <div>
-            <label className="block text-sm text-secondary mb-2">Location</label>
-            <input className="w-full bg-background border border-white/10 rounded-lg px-3 py-2" {...register('location', { required: true })} />
-          </div>
-          <div>
-            <label className="block text-sm text-secondary mb-2">Fuel Type</label>
-            <input className="w-full bg-background border border-white/10 rounded-lg px-3 py-2" {...register('fuelType')} placeholder="Petrol" />
-          </div>
-          <div>
-            <label className="block text-sm text-secondary mb-2">Transmission</label>
-            <input className="w-full bg-background border border-white/10 rounded-lg px-3 py-2" {...register('transmission')} placeholder="Auto" />
-          </div>
-          <div className="md:col-span-2">
-            <button type="submit" className="w-full bg-primary text-black font-bold py-3 rounded-lg hover:bg-white transition-colors">
-              Save Car
+          </Field>
+          <Field label="Registration Number" error={errors.regNumber}>
+            <input className="input" {...register('regNumber', { required: 'Registration is required' })} placeholder="DHA-123-456" />
+          </Field>
+          <Field label="Image URL" error={errors.image}>
+            <input
+              className="input"
+              {...register('image', {
+                required: 'Image URL is required',
+                pattern: { value: /^https?:\/\/.+/, message: 'Must be a valid URL' },
+              })}
+              placeholder="https://…"
+            />
+          </Field>
+          <Field label="Location" error={errors.location}>
+            <input className="input" {...register('location', { required: 'Location is required' })} placeholder="Dhaka" />
+          </Field>
+          <Field label="Fuel Type">
+            <select className="input cursor-pointer" {...register('fuelType')}>
+              {['Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG'].map((o) => (
+                <option key={o} value={o}>{o}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Transmission">
+            <select className="input cursor-pointer" {...register('transmission')}>
+              {['Auto', 'Manual', 'DCT', 'PDK', 'CVT'].map((o) => (
+                <option key={o} value={o}>{o}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Features (comma-separated)">
+            <input className="input" {...register('features')} placeholder="GPS, AC, Bluetooth" />
+          </Field>
+
+          <Field label="Description" error={errors.description} className="md:col-span-2">
+            <textarea
+              className="input min-h-[120px]"
+              rows={4}
+              {...register('description', { required: 'Description is required', minLength: { value: 10, message: 'Min 10 chars' } })}
+              placeholder="Tell renters what makes this car special…"
+            />
+          </Field>
+
+          <div className="md:col-span-2 flex items-center justify-end gap-3">
+            <button type="button" onClick={() => reset()} className="btn-ghost">
+              Reset
+            </button>
+            <button type="submit" disabled={isSubmitting} className="btn-primary disabled:opacity-50">
+              <FaPlus /> {isSubmitting ? 'Saving…' : 'Save Car'}
             </button>
           </div>
         </form>
       </div>
-    </div>
-  );
-};
+    </section>
+  )
+}
 
-export default AddCar;
+function Field({ label, children, error, className = '' }) {
+  return (
+    <div className={className}>
+      <label className="block text-xs uppercase tracking-widest text-secondary mb-1.5">{label}</label>
+      {children}
+      {error?.message && <p className="text-accent text-xs mt-1">{error.message}</p>}
+    </div>
+  )
+}
