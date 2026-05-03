@@ -1,234 +1,278 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axiosSecure from '../../services/axios';
-import { toast } from 'react-hot-toast';
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
+import { Link } from 'react-router-dom'
+import { FaCarSide, FaEdit, FaPlus, FaTrash, FaTimes } from 'react-icons/fa'
+import axiosSecure from '../../services/axios'
+import Loader from '../../components/Loader/Loader'
+import { formatDate } from '../../utils/date'
 
-const EditModal = ({ open, onClose, car, onSave }) => {
-  const [form, setForm] = useState({
-    model: car?.model || '',
-    brand: car?.brand || '',
-    dailyPrice: car?.dailyPrice || 0,
-    available: car?.available || true,
-    regNumber: car?.regNumber || '',
-    features: (car?.features || []).join(', '),
-    description: car?.description || '',
-    image: car?.image || '',
-    location: car?.location || '',
-    fuelType: car?.fuelType || 'Petrol',
-    transmission: car?.transmission || 'Auto',
-  });
-  if (!open) return null;
+export default function MyCars() {
+  const queryClient = useQueryClient()
+  const [editing, setEditing] = useState(null)
+  const [deleting, setDeleting] = useState(null)
+
+  const { data: cars = [], isLoading } = useQuery({
+    queryKey: ['my-cars'],
+    queryFn: async () => {
+      const res = await axiosSecure.get('/my-cars')
+      return res.data
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      await axiosSecure.delete(`/cars/${id}`)
+    },
+    onSuccess: () => {
+      toast.success('Car removed')
+      queryClient.invalidateQueries({ queryKey: ['my-cars'] })
+      setDeleting(null)
+    },
+    onError: () => toast.error('Failed to delete'),
+  })
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-surface border border-white/10 rounded-xl p-6 w-full max-w-2xl">
-        <h3 className="text-xl font-display font-bold mb-4">Update Car</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Object.entries({
-            model: 'Model',
-            brand: 'Brand',
-            dailyPrice: 'Daily Price',
-            regNumber: 'Registration',
-            image: 'Image URL',
-            location: 'Location',
-            fuelType: 'Fuel Type',
-            transmission: 'Transmission'
-          }).map(([key, label]) => (
-            <div key={key}>
-              <label className="block text-sm text-secondary mb-1">{label}</label>
-              <input
-                className="w-full bg-background border border-white/10 rounded-lg px-3 py-2"
-                value={form[key]}
-                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                type={key === 'dailyPrice' ? 'number' : 'text'}
-              />
-            </div>
-          ))}
+    <section className="py-14 md:py-20">
+      <div className="section">
+        <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
           <div>
-            <label className="block text-sm text-secondary mb-1">Available</label>
-            <select
-              className="w-full bg-background border border-white/10 rounded-lg px-3 py-2"
-              value={form.available ? 'true' : 'false'}
-              onChange={(e) => setForm({ ...form, available: e.target.value === 'true' })}
-            >
-              <option value="true">Available</option>
-              <option value="false">Booked</option>
-            </select>
+            <p className="text-primary uppercase tracking-[0.3em] text-xs mb-3">Your garage</p>
+            <h1 className="font-display font-bold text-4xl md:text-5xl">My Cars</h1>
+            <p className="text-secondary mt-2">Manage everything you have listed for rent in one place.</p>
           </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm text-secondary mb-1">Features (comma-separated)</label>
-            <input
-              className="w-full bg-background border border-white/10 rounded-lg px-3 py-2"
-              value={form.features}
-              onChange={(e) => setForm({ ...form, features: e.target.value })}
-            />
+          <Link to="/add-car" className="btn-primary self-start">
+            <FaPlus /> Add a new car
+          </Link>
+        </header>
+
+        {isLoading ? (
+          <Loader label="Loading your cars" />
+        ) : cars.length === 0 ? (
+          <div className="glass rounded-3xl py-20 text-center">
+            <div className="inline-flex h-16 w-16 rounded-full bg-primary/10 border border-primary/30 items-center justify-center mx-auto mb-4">
+              <FaCarSide className="text-primary text-2xl" />
+            </div>
+            <p className="font-display text-2xl font-bold">No cars yet</p>
+            <p className="text-secondary mt-2 mb-5">List your first car and start earning today.</p>
+            <Link to="/add-car" className="btn-primary"><FaPlus /> Add Car</Link>
           </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm text-secondary mb-1">Description</label>
-            <textarea
-              className="w-full bg-background border border-white/10 rounded-lg px-3 py-2"
-              rows="3"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-            />
+        ) : (
+          <div className="overflow-x-auto glass rounded-2xl">
+            <table className="w-full text-sm">
+              <thead className="bg-white/5 text-secondary uppercase tracking-wider text-xs">
+                <tr>
+                  <Th>Image</Th>
+                  <Th>Model</Th>
+                  <Th>Daily price</Th>
+                  <Th>Bookings</Th>
+                  <Th>Status</Th>
+                  <Th>Date added</Th>
+                  <Th className="text-right">Actions</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {cars.map((c, idx) => (
+                  <tr
+                    key={c._id}
+                    className={`border-t border-white/5 transition-colors hover:bg-primary/5 ${
+                      idx % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.02]'
+                    }`}
+                  >
+                    <Td>
+                      <img src={c.image} alt={c.model} className="h-12 w-20 object-cover rounded-md" />
+                    </Td>
+                    <Td>
+                      <div className="font-semibold">{c.model}</div>
+                      <div className="text-secondary text-xs">{c.brand}</div>
+                    </Td>
+                    <Td className="text-primary font-semibold">${c.dailyPrice}</Td>
+                    <Td>{c.bookingCount ?? 0}</Td>
+                    <Td>
+                      <span
+                        className={`badge ${
+                          c.available
+                            ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+                            : 'bg-red-500/20 border-red-400/40 text-red-300'
+                        }`}
+                      >
+                        {c.available ? 'Available' : 'Booked'}
+                      </span>
+                    </Td>
+                    <Td className="text-secondary">{formatDate(c.postedDate)}</Td>
+                    <Td className="text-right whitespace-nowrap">
+                      <button onClick={() => setEditing(c)} className="btn-info mr-2"><FaEdit /> Update</button>
+                      <button onClick={() => setDeleting(c)} className="btn-danger"><FaTrash /> Delete</button>
+                    </Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
-        <div className="flex justify-end gap-3 mt-6">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20">Cancel</button>
+        )}
+      </div>
+
+      {editing && (
+        <UpdateCarModal
+          car={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: ['my-cars'] })
+            setEditing(null)
+          }}
+        />
+      )}
+
+      {deleting && (
+        <ConfirmModal
+          title="Delete this car?"
+          desc={`"${deleting.model}" will be permanently removed from your listings.`}
+          confirmText="Delete"
+          danger
+          busy={deleteMutation.isPending}
+          onClose={() => setDeleting(null)}
+          onConfirm={() => deleteMutation.mutate(deleting._id)}
+        />
+      )}
+    </section>
+  )
+}
+
+function Th({ children, className = '' }) {
+  return <th className={`text-left px-5 py-4 ${className}`}>{children}</th>
+}
+function Td({ children, className = '' }) {
+  return <td className={`px-5 py-4 ${className}`}>{children}</td>
+}
+
+function ConfirmModal({ title, desc, onClose, onConfirm, busy, danger, confirmText = 'Confirm' }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="w-full max-w-md glass rounded-2xl p-6 border border-white/10 shadow-2xl">
+        <h3 className="font-display text-xl font-bold mb-2">{title}</h3>
+        <p className="text-secondary text-sm mb-5">{desc}</p>
+        <div className="flex justify-end gap-3">
+          <button onClick={onClose} className="btn-ghost !py-2 !px-4 text-sm">Cancel</button>
           <button
-            onClick={() => onSave(form)}
-            className="px-4 py-2 rounded-lg bg-primary text-black hover:bg-white"
+            onClick={onConfirm}
+            disabled={busy}
+            className={`btn-primary !py-2 !px-4 text-sm disabled:opacity-50 ${danger ? '!bg-accent !text-white hover:!bg-red-500' : ''}`}
           >
-            Save Changes
+            {busy ? 'Working…' : confirmText}
           </button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-const ConfirmModal = ({ open, onClose, onConfirm, title }) => {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-surface border border-white/10 rounded-xl p-6 w-full max-w-md">
-        <h3 className="text-xl font-display font-bold mb-3">{title}</h3>
-        <p className="text-secondary mb-6">This action cannot be undone.</p>
-        <div className="flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20">No</button>
-          <button onClick={onConfirm} className="px-4 py-2 rounded-lg bg-accent text-white hover:bg-red-500">Yes</button>
-        </div>
-      </div>
-    </div>
-  );
-};
+function UpdateCarModal({ car, onClose, onSaved }) {
+  const {
+    register, handleSubmit, formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      model: car.model,
+      brand: car.brand,
+      dailyPrice: car.dailyPrice,
+      available: car.available ? 'true' : 'false',
+      regNumber: car.regNumber,
+      image: car.image,
+      location: car.location,
+      description: car.description,
+      features: Array.isArray(car.features) ? car.features.join(', ') : (car.features || ''),
+      fuelType: car.fuelType || 'Petrol',
+      transmission: car.transmission || 'Auto',
+    },
+  })
 
-const MyCars = () => {
-  const queryClient = useQueryClient();
-  const [sort, setSort] = useState('date_desc');
-  const [editCar, setEditCar] = useState(null);
-  const [deleteCar, setDeleteCar] = useState(null);
-
-  const { data: cars = [], isLoading } = useQuery({
-    queryKey: ['my-cars', sort],
-    queryFn: async () => {
-      const res = await axiosSecure.get(`/my-cars?sort=${sort}`);
-      return res.data;
-    }
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, data }) => {
+  const onSubmit = async (data) => {
+    try {
       const payload = {
-        ...data,
-        features: data.features ? data.features.split(',').map(f => f.trim()) : []
-      };
-      const res = await axiosSecure.patch(`/cars/${id}`, payload);
-      return res.data;
-    },
-    onSuccess: () => {
-      toast.success('Car updated');
-      queryClient.invalidateQueries({ queryKey: ['my-cars'] });
-      setEditCar(null);
-    },
-    onError: () => toast.error('Update failed')
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id) => {
-      const res = await axiosSecure.delete(`/cars/${id}`);
-      return res.data;
-    },
-    onSuccess: () => {
-      toast.success('Car deleted');
-      queryClient.invalidateQueries({ queryKey: ['my-cars'] });
-      setDeleteCar(null);
-    },
-    onError: () => toast.error('Delete failed')
-  });
+        model: data.model,
+        brand: data.brand,
+        dailyPrice: Number(data.dailyPrice),
+        available: data.available === 'true',
+        regNumber: data.regNumber,
+        image: data.image,
+        location: data.location,
+        description: data.description,
+        features: data.features.split(',').map((f) => f.trim()).filter(Boolean),
+        fuelType: data.fuelType,
+        transmission: data.transmission,
+      }
+      await axiosSecure.patch(`/cars/${car._id}`, payload)
+      toast.success('Car updated')
+      onSaved()
+    } catch (e) {
+      toast.error(e?.response?.data?.message || 'Update failed')
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-background text-white pt-24 pb-10 px-4 md:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl md:text-4xl font-display font-bold">My Cars</h1>
-          <select
-            className="bg-background border border-white/10 rounded-lg px-4 py-2"
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-          >
-            <option value="date_desc">Newest First</option>
-            <option value="date_asc">Oldest First</option>
-            <option value="price_asc">Price: Low to High</option>
-            <option value="price_desc">Price: High to Low</option>
-          </select>
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 overflow-auto">
+      <div className="w-full max-w-3xl glass rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl my-8">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="font-display text-2xl font-bold">Update car</h3>
+          <button onClick={onClose} className="h-9 w-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-secondary hover:text-white">
+            <FaTimes />
+          </button>
         </div>
-
-        <div className="overflow-x-auto bg-surface border border-white/5 rounded-xl">
-          <table className="min-w-full">
-            <thead>
-              <tr className="bg-white/5">
-                <th className="text-left p-4">Image</th>
-                <th className="text-left p-4">Model</th>
-                <th className="text-left p-4">Price</th>
-                <th className="text-left p-4">Availability</th>
-                <th className="text-left p-4">Date Added</th>
-                <th className="text-left p-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td className="p-6" colSpan="6">Loading...</td></tr>
-              ) : cars.length === 0 ? (
-                <tr><td className="p-6 text-secondary" colSpan="6">No cars found. Add a car to get started.</td></tr>
-              ) : (
-                cars.map(car => (
-                  <tr key={car._id} className="border-t border-white/5 hover:bg-white/5">
-                    <td className="p-4">
-                      <img src={car.image} alt={car.model} className="w-20 h-14 object-cover rounded" />
-                    </td>
-                    <td className="p-4">{car.model}</td>
-                    <td className="p-4">${car.dailyPrice}/day</td>
-                    <td className="p-4">{car.available ? 'Available' : 'Booked'}</td>
-                    <td className="p-4">{new Date(car.postedDate).toLocaleDateString()}</td>
-                    <td className="p-4">
-                      <div className="flex gap-2">
-                        <button
-                          className="px-3 py-1 rounded bg-white/10 hover:bg-white/20"
-                          onClick={() => setEditCar(car)}
-                        >
-                          Update
-                        </button>
-                        <button
-                          className="px-3 py-1 rounded bg-accent text-white hover:bg-red-500"
-                          onClick={() => setDeleteCar(car)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {[
+            ['model', 'Model'],
+            ['brand', 'Brand'],
+            ['dailyPrice', 'Daily Price ($)', 'number'],
+            ['regNumber', 'Registration Number'],
+            ['image', 'Image URL'],
+            ['location', 'Location'],
+          ].map(([name, label, type]) => (
+            <div key={name}>
+              <label className="block text-xs uppercase tracking-widest text-secondary mb-1.5">{label}</label>
+              <input
+                type={type || 'text'}
+                className="input"
+                {...register(name, { required: `${label} is required` })}
+              />
+              {errors[name] && <p className="text-accent text-xs mt-1">{errors[name].message}</p>}
+            </div>
+          ))}
+          <div>
+            <label className="block text-xs uppercase tracking-widest text-secondary mb-1.5">Availability</label>
+            <select className="input cursor-pointer" {...register('available')}>
+              <option value="true">Available</option>
+              <option value="false">Booked</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-widest text-secondary mb-1.5">Fuel</label>
+            <select className="input cursor-pointer" {...register('fuelType')}>
+              {['Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG'].map((o) => <option key={o}>{o}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-widest text-secondary mb-1.5">Transmission</label>
+            <select className="input cursor-pointer" {...register('transmission')}>
+              {['Auto', 'Manual', 'DCT', 'PDK', 'CVT'].map((o) => <option key={o}>{o}</option>)}
+            </select>
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-xs uppercase tracking-widest text-secondary mb-1.5">Features (comma-separated)</label>
+            <input className="input" {...register('features')} />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-xs uppercase tracking-widest text-secondary mb-1.5">Description</label>
+            <textarea className="input min-h-[110px]" rows={4} {...register('description', { required: 'Description is required' })} />
+            {errors.description && <p className="text-accent text-xs mt-1">{errors.description.message}</p>}
+          </div>
+          <div className="md:col-span-2 flex justify-end gap-3 mt-2">
+            <button type="button" onClick={onClose} className="btn-ghost">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="btn-primary">
+              {isSubmitting ? 'Saving…' : 'Save changes'}
+            </button>
+          </div>
+        </form>
       </div>
-
-      <EditModal
-        open={!!editCar}
-        car={editCar}
-        onClose={() => setEditCar(null)}
-        onSave={(data) => updateMutation.mutate({ id: editCar._id, data })}
-      />
-
-      <ConfirmModal
-        open={!!deleteCar}
-        title="Are you sure you want to delete this car?"
-        onClose={() => setDeleteCar(null)}
-        onConfirm={() => deleteMutation.mutate(deleteCar._id)}
-      />
     </div>
-  );
-};
-
-export default MyCars;
+  )
+}
